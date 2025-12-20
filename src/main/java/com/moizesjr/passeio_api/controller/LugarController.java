@@ -3,6 +3,7 @@ package com.moizesjr.passeio_api.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +34,14 @@ public class LugarController {
     }
     // Se não vier nada, retorna a lista completa
     return repository.findAll();
+  }
+
+  // MÉTODO NOVO: Busca apenas 1 lugar pelo ID
+  @GetMapping("/{id}")
+  public ResponseEntity<Lugar> buscarPorId(@PathVariable Long id) {
+    return repository.findById(id)
+        .map(lugar -> ResponseEntity.ok(lugar)) // Se achar, devolve o lugar (Status 200)
+        .orElse(ResponseEntity.notFound().build()); // Se não achar, devolve erro 404
   }
 
   @PostMapping

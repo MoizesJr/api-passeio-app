@@ -39,7 +39,7 @@ public class DadosIniciais {
         // 2. Criar Lugares
         Lugar lugar1 = new Lugar();
         lugar1.setNome("Porto de Galinhas");
-        lugar1.setCategoria("Praia");
+        lugar1.setCategoria("Praias");
         lugar1.setLocalizacao("Ipojuca - PE");
         lugar1.setAvaliacao(4.8);
         lugar1
@@ -56,12 +56,12 @@ public class DadosIniciais {
 
         Lugar lugar3 = new Lugar();
         lugar3.setNome("Restaurante Leite");
-        lugar3.setCategoria("Restaurante");
+        lugar3.setCategoria("Restaurantes");
         lugar3.setLocalizacao("Recife - PE");
         lugar3.setAvaliacao(4.7);
         lugar3.setUrlFoto("https://media-cdn.tripadvisor.com/media/photo-s/09/55/54/cb/leite.jpg");
 
-        lugarRepo.saveAll(Arrays.asList(lugar1, lugar2));
+        lugarRepo.saveAll(Arrays.asList(lugar1, lugar2, lugar3));
 
         System.out.println("--- BANCO DE DADOS CARREGADO COM SUCESSO ---");
       }
