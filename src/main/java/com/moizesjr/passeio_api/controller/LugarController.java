@@ -2,7 +2,6 @@ package com.moizesjr.passeio_api.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,48 +15,58 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.moizesjr.passeio_api.model.Lugar;
-import com.moizesjr.passeio_api.repository.LugarRepository;
+import com.moizesjr.passeio_api.service.LugarService;
 
 @RestController
 @RequestMapping("/lugares")
 @CrossOrigin(origins = "*") // <--- LIBERA O ACESSO PARA O FRONT
 public class LugarController {
 
-  @Autowired
-  private LugarRepository repository;
+  private final LugarService service;
 
-  @GetMapping
-  public List<Lugar> listar(@RequestParam(required = false) String categoria) {
-    // Se vier algo escrito na categoria, usa o filtro novo
-    if (categoria != null && !categoria.isEmpty()) {
-      return repository.findByCategoriaContainingIgnoreCase(categoria);
-    }
-    // Se não vier nada, retorna a lista completa
-    return repository.findAll();
+  public LugarController(LugarService service) {
+    this.service = service;
   }
 
-  // MÉTODO NOVO: Busca apenas 1 lugar pelo ID
+  // 1º CRIAR LUGAR
+  @PostMapping
+  public ResponseEntity<Lugar> criar(@RequestBody Lugar lugar) {
+    Lugar lugarSalvo = service.criar(lugar);
+    return ResponseEntity.status(201).body(lugarSalvo); // 201 Created
+  }
+
+  // 2º LISTAR LUGARES
+  @GetMapping
+  public ResponseEntity<List<Lugar>> listar(@RequestParam(required = false) String categoria) {
+    return ResponseEntity.ok(service.listarTodos(categoria)); // 200 OK
+  }
+
+  // 3º BUSCAR LUGAR POR ID
   @GetMapping("/{id}")
   public ResponseEntity<Lugar> buscarPorId(@PathVariable Long id) {
-    return repository.findById(id)
-        .map(lugar -> ResponseEntity.ok(lugar)) // Se achar, devolve o lugar (Status 200)
-        .orElse(ResponseEntity.notFound().build()); // Se não achar, devolve erro 404
+    return service.buscarPorId(id)
+        .map(lugar -> ResponseEntity.ok(lugar)) // Se tiver lugar -> 200 OK
+        .orElse(ResponseEntity.notFound().build()); // Se estiver vazio -> 404 Not Found;
   }
 
-  @PostMapping
-  public Lugar criar(@RequestBody Lugar lugar) {
-    return repository.save(lugar);
-  }
-
+  // 4º ATUALIZAR LUGAR
   @PutMapping("/{id}")
-  public Lugar atualizar(@PathVariable Long id, @RequestBody Lugar lugar) {
-    // Garante que estamos atualizando o ID que veio na URL
-    lugar.setId(id);
-    return repository.save(lugar);
+  public ResponseEntity<Lugar> atualizar(@PathVariable Long id, @RequestBody Lugar lugar) {
+    return service.atualizar(id, lugar)
+        // .map: Se a caixa tiver algo (o lugar atualizado): 200 OK
+        .map(lugarAtualizado -> ResponseEntity.ok(lugarAtualizado))
+        // .orElse: Se a caixa estiver vazia (não achou o ID): 404 Not Found
+        .orElse(ResponseEntity.notFound().build());
   }
 
+  // 5º DELETAR LUGAR
   @DeleteMapping("/{id}")
-  public void deletar(@PathVariable Long id) {
-    repository.deleteById(id);
+  public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    if (service.deletar(id)) {
+      // Se deletou com sucesso: retorna 204 No Content (padrão para delete)
+      return ResponseEntity.noContent().build();
+    }
+    // Se retornou false (não achou o id): 404
+    return ResponseEntity.notFound().build();
   }
 }

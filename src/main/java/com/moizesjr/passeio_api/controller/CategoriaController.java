@@ -2,7 +2,6 @@ package com.moizesjr.passeio_api.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,43 +14,56 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.moizesjr.passeio_api.model.Categoria;
-import com.moizesjr.passeio_api.repository.CategoriaRepository;
+import com.moizesjr.passeio_api.service.CategoriaService;
 
 @RestController
 @RequestMapping("/categorias")
 @CrossOrigin(origins = "*") // <--- LIBERA O ACESSO
 public class CategoriaController {
 
-  @Autowired
-  private CategoriaRepository repository;
+  private final CategoriaService service;
 
-  @GetMapping
-  public List<Categoria> listar() {
-    return repository.findAll();
+  public CategoriaController(CategoriaService service) {
+    this.service = service;
   }
 
-  // MÉTODO NOVO: Busca apenas 1 lugar pelo ID
+  // 1º CRIAR CATEGORIA
+  @PostMapping
+  public ResponseEntity<Categoria> criar(@RequestBody Categoria categoria) {
+    Categoria categoriaCriada = service.criar(categoria);
+    return ResponseEntity.status(201).body(categoriaCriada); // 201 Created
+  }
+
+  // 2º LISTAR CATEGORIAS
+  @GetMapping
+  public ResponseEntity<List<Categoria>> listar() {
+    return ResponseEntity.ok(service.listarTodos());
+  }
+
+  // 3º BUSCAR CATEGORIA POR ID
   @GetMapping("/{id}")
   public ResponseEntity<Categoria> buscarPorId(@PathVariable Long id) {
-    return repository.findById(id)
+    return service.buscarPorId(id)
         .map(categoria -> ResponseEntity.ok(categoria)) // Se achar, devolve o lugar (Status 200)
         .orElse(ResponseEntity.notFound().build()); // Se não achar, devolve erro 404
   }
 
-  @PostMapping
-  public Categoria criar(@RequestBody Categoria categoria) {
-    return repository.save(categoria);
-  }
-
+  // 4º ATUALIZAR CATEGORIA
   @PutMapping("/{id}")
-  public Categoria atualizar(@PathVariable Long id, @RequestBody Categoria categoria) {
-    // Garante que estamos atualizando o ID que veio na URL
-    categoria.setId(id);
-    return repository.save(categoria);
+  public ResponseEntity<Categoria> atualizar(@PathVariable Long id, @RequestBody Categoria categoria) {
+    return service.atualizar(id, categoria)
+        .map(categoriaAtualizada -> ResponseEntity.ok(categoriaAtualizada)) // Se achar, devolve o lugar (Status 200)
+        .orElse(ResponseEntity.notFound().build()); // Se não achar, devolve erro 404
   }
 
+  // 5º DELETAR CATEGORIA
   @DeleteMapping("/{id}")
-  public void deletar(@PathVariable Long id) {
-    repository.deleteById(id);
+  public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    if (service.deletar(id)) {
+      // Se deletou com sucesso: retorna 204 No Content (padrão para delete)
+      return ResponseEntity.noContent().build();
+    }
+    // Se retornou false (não achou o id): 404
+    return ResponseEntity.notFound().build();
   }
 }
