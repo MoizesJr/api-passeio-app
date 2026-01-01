@@ -39,7 +39,7 @@ public class DadosIniciais {
         // 2. Criar Lugares
         Lugar lugar1 = new Lugar();
         lugar1.setNome("Porto de Galinhas");
-        lugar1.setCategoria("Praias");
+        lugar1.setCategoria(cat1);
         lugar1.setLocalizacao("Ipojuca - PE");
         lugar1.setAvaliacao(4.8);
         lugar1
@@ -48,7 +48,7 @@ public class DadosIniciais {
 
         Lugar lugar2 = new Lugar();
         lugar2.setNome("Marco Zero");
-        lugar2.setCategoria("Histórico");
+        lugar2.setCategoria(cat2);
         lugar2.setLocalizacao("Recife - PE");
         lugar2.setAvaliacao(4.5);
         lugar2.setUrlFoto(
@@ -56,7 +56,7 @@ public class DadosIniciais {
 
         Lugar lugar3 = new Lugar();
         lugar3.setNome("Restaurante Leite");
-        lugar3.setCategoria("Restaurantes");
+        lugar3.setCategoria(cat3);
         lugar3.setLocalizacao("Recife - PE");
         lugar3.setAvaliacao(4.7);
         lugar3.setUrlFoto("https://media-cdn.tripadvisor.com/media/photo-s/09/55/54/cb/leite.jpg");

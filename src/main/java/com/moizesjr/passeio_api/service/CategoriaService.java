@@ -1,10 +1,10 @@
 package com.moizesjr.passeio_api.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.moizesjr.passeio_api.exception.RecursoNaoEncontradoException;
 import com.moizesjr.passeio_api.model.Categoria;
 import com.moizesjr.passeio_api.repository.CategoriaRepository;
 
@@ -25,24 +25,24 @@ public class CategoriaService {
     return repository.findAll();
   }
 
-  public Optional<Categoria> buscarPorId(Long id) {
-    return repository.findById(id);
+  public Categoria buscarPorId(Long id) {
+    return repository.findById(id)
+        // Se não achar, LANÇA O ERRO. O Handler montar o JSON.
+        .orElseThrow(() -> new RecursoNaoEncontradoException("Lugar não existente com ID: " + id));
   }
 
-  public Optional<Categoria> atualizar(Long id, Categoria categoria) {
-    if (repository.existsById(id)) {
-      categoria.setId(id);
-      return Optional.of(repository.save(categoria));
-    }
-    return Optional.empty();
+  public Categoria atualizar(Long id, Categoria categoriaAtualizado) {
+    // Verifica o método buscarPorId que já lança erro se falhar
+    Categoria existente = buscarPorId(id);
+
+    categoriaAtualizado.setId(existente.getId());
+    return repository.save(categoriaAtualizado);
   }
 
-  public boolean deletar(Long id) {
-    if (repository.existsById(id)) {
-      repository.deleteById(id);
-      return true;
-    }
-    return false;
+  public void deletar(Long id) {
+    // Se não existir, o buscarPorId já estoura o erro 404
+    buscarPorId(id);
+    repository.deleteById(id);
   }
 
 }
