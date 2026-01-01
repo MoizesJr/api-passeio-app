@@ -4,11 +4,14 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.moizesjr.passeio_api.model.Lugar; // <--- Não esqueça de importar o List
+import com.moizesjr.passeio_api.model.Lugar;
 
 public interface LugarRepository extends JpaRepository<Lugar, Long> {
 
-  // O Spring entende: "Busque por Categoria, ignorando maiúsculas/minúsculas e
-  // aceitando partes do nome"
-  List<Lugar> findByCategoriaContainingIgnoreCase(String categoria);
+  // Este método busca Lugares que contenham o nome informado
+  // E que pertençam a uma Categoria com o nome informado.
+  List<Lugar> findByNomeContainingIgnoreCaseAndCategoriaNomeContainingIgnoreCase(String nome, String categoriaNome);
+
+  // Caso queira filtrar só por nome quando a categoria for "Todas"
+  List<Lugar> findByNomeContainingIgnoreCase(String nome);
 }

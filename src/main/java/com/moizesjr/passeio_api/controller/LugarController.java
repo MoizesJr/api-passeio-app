@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.moizesjr.passeio_api.model.Lugar;
 import com.moizesjr.passeio_api.service.LugarService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/lugares")
 @CrossOrigin(origins = "*") // <--- LIBERA O ACESSO PARA O FRONT
@@ -30,43 +32,39 @@ public class LugarController {
 
   // 1º CRIAR LUGAR
   @PostMapping
-  public ResponseEntity<Lugar> criar(@RequestBody Lugar lugar) {
+  public ResponseEntity<Lugar> criar(@RequestBody @Valid Lugar lugar) {
     Lugar lugarSalvo = service.criar(lugar);
-    return ResponseEntity.status(201).body(lugarSalvo); // 201 Created
+    return ResponseEntity.ok(lugarSalvo); // 201 Created
   }
 
   // 2º LISTAR LUGARES
   @GetMapping
-  public ResponseEntity<List<Lugar>> listar(@RequestParam(required = false) String categoria) {
-    return ResponseEntity.ok(service.listarTodos(categoria)); // 200 OK
+  public ResponseEntity<List<Lugar>> listar(
+      @RequestParam(required = false, defaultValue = "") String nome,
+      @RequestParam(required = false, defaultValue = "-1") String categoria) {
+
+    return ResponseEntity.ok(service.listarTodos(nome, categoria));
   }
 
   // 3º BUSCAR LUGAR POR ID
   @GetMapping("/{id}")
   public ResponseEntity<Lugar> buscarPorId(@PathVariable Long id) {
-    return service.buscarPorId(id)
-        .map(lugar -> ResponseEntity.ok(lugar)) // Se tiver lugar -> 200 OK
-        .orElse(ResponseEntity.notFound().build()); // Se estiver vazio -> 404 Not Found;
+    // Se der erro, o Service lança exceção e o código nem passa daqui
+    Lugar lugar = service.buscarPorId(id);
+    return ResponseEntity.ok(lugar);
   }
 
   // 4º ATUALIZAR LUGAR
   @PutMapping("/{id}")
-  public ResponseEntity<Lugar> atualizar(@PathVariable Long id, @RequestBody Lugar lugar) {
-    return service.atualizar(id, lugar)
-        // .map: Se a caixa tiver algo (o lugar atualizado): 200 OK
-        .map(lugarAtualizado -> ResponseEntity.ok(lugarAtualizado))
-        // .orElse: Se a caixa estiver vazia (não achou o ID): 404 Not Found
-        .orElse(ResponseEntity.notFound().build());
+  public ResponseEntity<Lugar> atualizar(@PathVariable Long id, @RequestBody @Valid Lugar lugar) {
+    Lugar atualizado = service.atualizar(id, lugar);
+    return ResponseEntity.ok(atualizado);
   }
 
   // 5º DELETAR LUGAR
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> deletar(@PathVariable Long id) {
-    if (service.deletar(id)) {
-      // Se deletou com sucesso: retorna 204 No Content (padrão para delete)
-      return ResponseEntity.noContent().build();
-    }
-    // Se retornou false (não achou o id): 404
-    return ResponseEntity.notFound().build();
+    service.deletar(id);
+    return ResponseEntity.noContent().build();
   }
 }

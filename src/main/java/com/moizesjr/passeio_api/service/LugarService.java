@@ -1,10 +1,10 @@
 package com.moizesjr.passeio_api.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.moizesjr.passeio_api.exception.RecursoNaoEncontradoException;
 import com.moizesjr.passeio_api.model.Lugar;
 import com.moizesjr.passeio_api.repository.LugarRepository;
 
@@ -21,35 +21,32 @@ public class LugarService {
     return repository.save(lugar);
   }
 
-  public List<Lugar> listarTodos(String categoria) {
-    // Se vier algo escrito na categoria(EXE: /lugares?categoria=praia), usa o
-    // filtro novo
-    if (categoria != null && !categoria.isEmpty()) {
-      return repository.findByCategoriaContainingIgnoreCase(categoria);
+  public List<Lugar> listarTodos(String nome, String categoriaNome) {
+    if (categoriaNome != null && !categoriaNome.equals("-1")) {
+      return repository.findByNomeContainingIgnoreCaseAndCategoriaNomeContainingIgnoreCase(nome, categoriaNome);
     }
     // Se não vier nada, retorna a lista completa
-    return repository.findAll();
+    return repository.findByNomeContainingIgnoreCase(nome);
   }
 
-  public Optional<Lugar> buscarPorId(Long id) {
-    return repository.findById(id);
+  public Lugar buscarPorId(Long id) {
+    return repository.findById(id)
+        // Se não achar, LANÇA O ERRO. O Handler montar o JSON.
+        .orElseThrow(() -> new RecursoNaoEncontradoException("Lugar não existente com ID: " + id));
   }
 
   // verificar antes de salvar
-  public Optional<Lugar> atualizar(Long id, Lugar lugarAtualizado) {
-    if (!repository.existsById(id)) {
-      lugarAtualizado.setId(id);
-      return Optional.of(repository.save(lugarAtualizado));
-    }
-    // Se não existir, retornamos vazio (404)
-    return Optional.empty();
+  public Lugar atualizar(Long id, Lugar lugarAtualizado) {
+    // Verifica o método buscarPorId que já lança erro se falhar
+    Lugar existente = buscarPorId(id);
+
+    lugarAtualizado.setId(existente.getId());
+    return repository.save(lugarAtualizado);
   }
 
-  public boolean deletar(Long id) {
-    if (repository.existsById(id)) {
-      repository.deleteById(id);
-      return true; // confirmar que deletou
-    }
-    return false; // não encontrou para deletar
+  public void deletar(Long id) {
+    // Se não existir, o buscarPorId já estoura o erro 404
+    buscarPorId(id);
+    repository.deleteById(id);
   }
 }
