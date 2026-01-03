@@ -3,18 +3,16 @@ package com.moizesjr.passeio_api.config;
 import java.util.Arrays;
 
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 import com.moizesjr.passeio_api.model.Categoria;
 import com.moizesjr.passeio_api.model.Lugar;
 import com.moizesjr.passeio_api.repository.CategoriaRepository;
 import com.moizesjr.passeio_api.repository.LugarRepository;
 
-@Configuration
+//@Configuration
 public class DadosIniciais {
 
-  @Bean
+  // @Bean
   public CommandLineRunner carregarDados(LugarRepository lugarRepo, CategoriaRepository categoriaRepo) {
     return args -> {
       // Se o banco estiver vazio, cria dados de teste
