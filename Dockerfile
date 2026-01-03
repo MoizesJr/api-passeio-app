@@ -1,4 +1,3 @@
-# --- Estágio 1: A Fábrica (Construção) ---
 # Usamos uma imagem com o JDK completo para compilar o projeto
 FROM eclipse-temurin:17-jdk-alpine AS build
 
